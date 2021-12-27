@@ -6,15 +6,6 @@ import {
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
-const errorToast = msg => {
-  createToast(msg, {
-    position: "top-right",
-    type: "danger",
-    transition: "slide",
-    showIcon: false,
-  });
-};
-
 onAuthStateChanged(auth, async user => {
   if (user) {
     if (user.email.includes("@miamioh.edu")) {
@@ -32,11 +23,11 @@ onAuthStateChanged(auth, async user => {
         });
         console.log("Successful logged in.", state.user);
       } else {
-        errorToast("You are not authorized. Contact Joshua Ferris if you think this is an error.");
+        actions.errorToast("You are not authorized. Contact Joshua Ferris if you think this is an error.");
         mutations.setUser(null);
       }
     } else {
-      errorToast("Please use your @miamioh.edu email.");
+      actions.errorToast("Please use your @miamioh.edu email.");
       actions.logout();
     }
   } else {
@@ -60,6 +51,24 @@ const actions = {
   logout: async () => {
     mutations.setUser(null);
     signOut(auth);
+  },
+  errorToast: msg => {
+    createToast(msg, {
+      type: "danger",
+      transition: "slide",
+    });
+  },
+  infoToast: msg => {
+    createToast(msg, {
+      type: "info",
+      transition: "slide",
+    });
+  },
+  successToast: msg => {
+    createToast(msg, {
+      type: "success",
+      transition: "slide",
+    });
   },
 };
 
