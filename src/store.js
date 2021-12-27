@@ -12,7 +12,6 @@ onAuthStateChanged(auth, async user => {
       const usr = {
         id: user.uid,
         email: user.email,
-        name: user.displayName,
       };
       const docRef = doc(db, "users", usr.email);
       const docSnap = await getDoc(docRef);
