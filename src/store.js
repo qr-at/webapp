@@ -2,17 +2,28 @@ import { reactive } from "vue";
 import {
   onAuthStateChanged, GoogleAuthProvider, signInWithRedirect, signOut
 } from "firebase/auth";
-import { auth } from "./firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "./firebase";
 
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, async user => {
   if (user && user.email.includes("@miamioh.edu")) {
     const usr = {
       id: user.uid,
       email: user.email,
       name: user.displayName,
     };
-    console.log("Successful logged in.", usr);
-    mutations.setUser(usr);
+    const docRef = doc(db, "users", usr.email);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      mutations.setUser({
+        ...usr,
+        ...docSnap.data(),
+      });
+      console.log("Successful logged in.", state.user);
+    } else {
+      console.log("Not authorized to use this application. If you believe this is an error please contact Joshua Ferris <ferrisj2@miamioh.edu>");
+      mutations.setUser(null);
+    }
   } else {
     console.log("No user || Not a Miami email");
     mutations.setUser(null);
