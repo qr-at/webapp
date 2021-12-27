@@ -1,31 +1,45 @@
 import { reactive } from "vue";
+import { createToast } from "mosha-vue-toastify";
 import {
   onAuthStateChanged, GoogleAuthProvider, signInWithRedirect, signOut
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
+const errorToast = msg => {
+  createToast(msg, {
+    position: "top-right",
+    type: "danger",
+    transition: "slide",
+    showIcon: false,
+  });
+};
+
 onAuthStateChanged(auth, async user => {
-  if (user && user.email.includes("@miamioh.edu")) {
-    const usr = {
-      id: user.uid,
-      email: user.email,
-      name: user.displayName,
-    };
-    const docRef = doc(db, "users", usr.email);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      mutations.setUser({
-        ...usr,
-        ...docSnap.data(),
-      });
-      console.log("Successful logged in.", state.user);
+  if (user) {
+    if (user.email.includes("@miamioh.edu")) {
+      const usr = {
+        id: user.uid,
+        email: user.email,
+        name: user.displayName,
+      };
+      const docRef = doc(db, "users", usr.email);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        mutations.setUser({
+          ...usr,
+          ...docSnap.data(),
+        });
+        console.log("Successful logged in.", state.user);
+      } else {
+        errorToast("You are not authorized. Contact Joshua Ferris if you think this is an error.");
+        mutations.setUser(null);
+      }
     } else {
-      console.log("Not authorized to use this application. If you believe this is an error please contact Joshua Ferris <ferrisj2@miamioh.edu>");
-      mutations.setUser(null);
+      errorToast("Please use your @miamioh.edu email.");
+      actions.logout();
     }
   } else {
-    console.log("No user || Not a Miami email");
     mutations.setUser(null);
   }
 });
@@ -40,7 +54,6 @@ const mutations = {
 
 const actions = {
   login: async () => {
-    console.log("Logging you in!");
     const provider = new GoogleAuthProvider();
     signInWithRedirect(auth, provider);
   },
