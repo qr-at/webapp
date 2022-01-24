@@ -62,8 +62,7 @@
       q = query(
         collection(db, "checkins"),
         where("section", "==", searchSection.value),
-        where("date", "==", searchDate.value),
-        where("email", "in", studentEmails)
+        where("date", "==", searchDate.value)
       );
       const unsubscribe = onSnapshot(q, qs => {
         const attendance = {};
