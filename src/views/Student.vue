@@ -95,7 +95,7 @@
       </div>
       <div v-else class="mx-auto w-full sm:1/2 md:w-1/4 bg-white shadow-lg rounded-lg py-4 px-6">
         <p class="text-center text-light tracking-tight">BUS104 EA</p>
-        <p class="text-center text-light tracking-tight text-xs mb-4">Check-in window: 1:00 - 2:50</p>
+        <!-- <p class="text-center text-light tracking-tight text-xs mb-4">Check-in window: 1:00 - 2:50</p> -->
         <button @click="checkin" class="mx-auto block bg-transparent hover:bg-purple-400 text-purple-700 font-semibold hover:text-white py-2 px-4 border border-purple-400 hover:border-transparent rounded duration-200">
           <span v-if="checkingIn">Loading!</span>
           <span v-else>Check in</span>
