@@ -184,7 +184,7 @@
       <transition name="fade" mode="out-in">
         <table
           v-if="students && students.length > 0"
-          class="h-fit col-span-12 md:col-span-9 py-4 px-6 divide-y divide-gray-200 shadow-lg"
+          class="h-fit col-span-12 md:col-span-9 py-4 px-6 divide-y divide-gray-200 shadow-lg mb-6"
         >
           <thead class="bg-gray-50">
             <tr>
