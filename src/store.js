@@ -36,10 +36,12 @@ onAuthStateChanged(auth, async user => {
 
 const state = reactive({
   user: undefined,
+  students: null,
 });
 
 const mutations = {
   setUser: (v) => state.user = v,
+  setStudents: (v) => state.students = v,
 };
 
 const actions = {
