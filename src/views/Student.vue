@@ -10,7 +10,7 @@
     return {
       day: d.getDay(),
       tsm: (d.getHours() * 60) + d.getMinutes(),
-      date: d.getFullYear() + "-" + String((d.getMonth() + 1)).padStart(2, "0") + "-" + d.getDate(),
+      date: d.getFullYear() + "-" + String((d.getMonth() + 1)).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"),
     };
   };
 
