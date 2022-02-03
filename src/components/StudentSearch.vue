@@ -19,7 +19,6 @@
       qsnap.forEach(doc => {
         const { date, excused, present } = doc.data();
         const jDate = new Date(date+"T12:00:00");
-        console.log(jDate);
         attendance.push({ date: jDate, excused, present });
       });
       attendance.sort((a, b) => a.date - b.date);
