@@ -150,7 +150,7 @@
             <td class="px-6 py-4">{{ student.email }}</td>
             <td class="px-6 py-4">{{ student.sections.join(", ") }}</td>
             <td class="px-6 py-4">
-              <div v-if="student.email == store.state.student.email" class="py-1 text-green-500 border border-transparent">Selected</div>
+              <div v-if="store.state.student && student.email == store.state.student.email" class="py-1 text-green-500 border border-transparent">Selected</div>
               <button v-else @click="() => store.mutations.setStudent(student)" class="bg-transparent hover:bg-green-500 text-green-700 hover:text-slate-50 py-1 px-2 border border-green-500 hover:border-transparent rounded">
                 Select Student
               </button>
