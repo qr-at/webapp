@@ -133,7 +133,7 @@
       >
         <thead class="bg-gray-50">
           <tr>
-            <th colspan="3" class="p-2">
+            <th colspan="4" class="p-2">
               <input type="text" placeholder="Search..." v-model="searchQuery" class="w-full bg-gray-200 border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400" />
             </th>
           </tr>
@@ -141,6 +141,7 @@
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sections</th>
+            <th scope="col" class="px-6 py-3"></th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -148,6 +149,12 @@
             <td class="px-6 py-4">{{ student.name }}</td>
             <td class="px-6 py-4">{{ student.email }}</td>
             <td class="px-6 py-4">{{ student.sections.join(", ") }}</td>
+            <td class="px-6 py-4">
+              <div v-if="student.email == store.state.student.email" class="py-1 text-green-500 border border-transparent">Selected</div>
+              <button v-else @click="() => store.mutations.setStudent(student)" class="bg-transparent hover:bg-green-500 text-green-700 hover:text-slate-50 py-1 px-2 border border-green-500 hover:border-transparent rounded">
+                Select Student
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
