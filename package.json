@@ -4,7 +4,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "fb:deploy": "firebase deploy --only functions",
+    "fb:emulate": "firebase emulators:start"
   },
   "dependencies": {
     "@tailwindcss/forms": "^0.4.0",
