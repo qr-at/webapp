@@ -65,7 +65,7 @@
       return (
         student.name.toLowerCase().indexOf(searchQuery.value.toLowerCase()) != -1
         || student.email.toLowerCase().indexOf(searchQuery.value.toLowerCase()) != -1
-        || student.sections.join("").toLowerCase().indexOf(searchQuery.value.toLowerCase()) != -1
+        || student.section.toLowerCase().indexOf(searchQuery.value.toLowerCase()) != -1
       )
     });
   });
@@ -76,16 +76,14 @@
       store.mutations.setStudents(null);
       let students = [];
       const q = query(
-        collection(db, "users"),
-        where("sections", "array-contains-any", store.state.user.sections)
+        collection(db, "attendance"),
+        where("section", "in", store.state.user.sections)
       );
       const qsnap = await getDocs(q);
       qsnap.forEach(doc => {
-        const { name, instructor, sections } = doc.data();
-        const sectionsThatMatter = sections.filter(v => store.state.user.sections.indexOf(v) > -1);
-        if (instructor) return;
-        students.push({ name, email: doc.id, sections: sectionsThatMatter });
+        students.push(doc.data());
       });
+      students.sort((a, b) => a.name.split(" ")[1] > b.name.split(" ")[1]);
       store.mutations.setStudents(students);
     } catch (err) {
       console.log("ERROR | Fetching students.", err);
@@ -133,22 +131,26 @@
       >
         <thead class="bg-gray-50">
           <tr>
-            <th colspan="4" class="p-2">
+            <th colspan="6" class="p-2">
               <input type="text" placeholder="Search..." v-model="searchQuery" class="w-full bg-gray-200 border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400" />
             </th>
           </tr>
           <tr>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sections</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Excused</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Present</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Attended</th>
             <th scope="col" class="px-6 py-3"></th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <tr v-for="student in searchedStudents" :key="student.email">
             <td class="px-6 py-4">{{ student.name }}</td>
-            <td class="px-6 py-4">{{ student.email }}</td>
-            <td class="px-6 py-4">{{ student.sections.join(", ") }}</td>
+            <td class="px-6 py-4">{{ student.section }}</td>
+            <td class="px-6 py-4">{{ student.excused }}</td>
+            <td class="px-6 py-4">{{ student.present }}</td>
+            <td class="px-6 py-4">{{ student.lastAttended }}</td>
             <td class="px-6 py-4">
               <div v-if="store.state.student && student.email == store.state.student.email" class="py-1 text-green-500 border border-transparent">Selected</div>
               <button v-else @click="() => store.mutations.setStudent(student)" class="bg-transparent hover:bg-green-500 text-green-700 hover:text-slate-50 py-1 px-2 border border-green-500 hover:border-transparent rounded">
@@ -160,7 +162,7 @@
       </table>
       <div v-else-if="store.state.students && store.state.students.length == 0">No students</div>
       <div v-else-if="loading">Loading...</div>
-      <div v-else>Error - option to try again</div>
+      <div v-else>Error - please try again shortly. You may use the "Refresh Students" button.</div>
     </transition>
   </div>
 </template>
