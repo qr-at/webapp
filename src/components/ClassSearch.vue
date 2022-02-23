@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, onBeforeUnmount } from "vue";
+  import { ref, onBeforeUnmount, computed } from "vue";
   import { query, collection, where, getDocs, onSnapshot, updateDoc, doc, addDoc } from "firebase/firestore";
   import { db } from "../firebase";
   import store from "../store";
@@ -12,6 +12,17 @@
   const searchSection = ref("");
   const searchSub = ref(null);
   const students = ref(null);
+
+  const presentCount = computed(() => {
+    if (!students.value) return 0;
+    const onlyPresent = students.value.filter(el => el.present);
+    return onlyPresent.length;
+  });
+  const excusedCount = computed(() => {
+    if (!students.value) return 0;
+    const onlyExcused = students.value.filter(el => el.excused);
+    return onlyExcused.length;
+  });
 
   const sectionHasClass = async (section, date) => {
     const d = new Date(date+"T12:00:00");
@@ -159,9 +170,13 @@
     <!-- Search Panel -->
     <div class="h-fit col-span-12 md:col-span-3 bg-white shadow-lg rounded-lg py-4 px-6">
       <transition name="fade" mode="out-in">
-        <button v-if="students" @click="clearSearch" class="mt-4 w-full bg-transparent hover:bg-purple-400 text-purple-700 font-semibold hover:text-white py-3 px-4 border border-purple-400 hover:border-transparent rounded">
-          New Search
-        </button>
+        <div v-if="students">
+          <h3 class="font-bold text-center">{{ searchDate }} - {{ searchSection }}</h3>
+          <p class="text-xs text-center">Students: {{ students.length }} (P={{ presentCount }}, E={{ excusedCount }}, A={{ students.length - presentCount - excusedCount }})</p>
+          <button @click="clearSearch" class="mt-4 w-full bg-transparent hover:bg-purple-400 text-purple-700 font-semibold hover:text-white py-3 px-4 border border-purple-400 hover:border-transparent rounded">
+            New Search
+          </button>
+        </div>
         <div v-else>
           <h3 class="text-center">Search Classes</h3>
           <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold" for="search-date">
@@ -189,11 +204,6 @@
         class="h-fit col-span-12 md:col-span-9 py-4 px-6 divide-y divide-gray-200 shadow-lg mb-6"
       >
         <thead class="bg-gray-50">
-          <tr>
-            <th colspan="4">
-              <h3 class="font-normal text-center">{{ searchDate }} - {{ searchSection }}</h3>
-            </th>
-          </tr>
           <tr>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
