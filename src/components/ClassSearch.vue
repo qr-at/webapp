@@ -9,7 +9,7 @@
 
   const searching = ref(false);
   const searchDate = ref(null);
-  const searchSection = ref("");
+  const searchSections = ref([]);
   const searchSub = ref(null);
   const students = ref(null);
 
@@ -24,27 +24,37 @@
     return onlyExcused.length;
   });
 
-  const sectionHasClass = async (section, date) => {
-    const d = new Date(date+"T12:00:00");
-    const q = query(
-      collection(db, "classes"),
-      where("day", "==", d.getDay()),
-      where("section", "==", section)
-    );
-    const qsnap = await getDocs(q);
-    return !qsnap.empty;
+  const allSectionHaveClass = async (sections, date) => {
+    let allGood = true;
+
+    for (const section of sections) {
+      const d = new Date(date+"T12:00:00");
+      const q = query(
+        collection(db, "classes"),
+        where("day", "==", d.getDay()),
+        where("section", "==", section)
+      );
+      const qsnap = await getDocs(q);
+      if (qsnap.empty) {
+        store.actions.errorToast(`${section} did not have class on ${date}.`);
+        allGood = false;
+      }
+    }
+
+    return allGood;
   };
-  const studentsInSection = async section => {
+
+  const studentsInSections = async sections => {
     let studs = [];
     const q = query(
       collection(db, "users"),
-      where("sections", "array-contains", section)
+      where("sections", "array-contains-any", sections)
     );
     const qsnap = await getDocs(q);
     qsnap.forEach(doc => {
-      const { name, instructor } = doc.data();
+      const { name, instructor, sections: studSections } = doc.data();
       if (instructor) return;
-      studs.push({ name, email: doc.id, section });
+      studs.push({ name, email: doc.id, section: sections.filter(value=>studSections.includes(value))[0] });
     });
     return studs;
   };
@@ -61,29 +71,26 @@
     if (!searchDate.value) {
       store.actions.errorToast("The date field is required.");
       return;
-    } else if (!searchSection.value) {
-      store.actions.errorToast("The section field is required.");
+    } else if (!searchSections.value || searchSections.value.length < 1) {
+      store.actions.errorToast("The sections field is required.");
       return;
     }
 
     try {
-      console.log(`Searching for ${searchSection.value}'s class on ${searchDate.value}`);
+      console.log(`Searching for ${searchSections.value}'s class on ${searchDate.value}`);
       searching.value = true;
-      
-      // Ensure section had a class on requested date
-      const hadClass = await sectionHasClass(searchSection.value, searchDate.value);
-      if (!hadClass) {
-        store.actions.errorToast(`${searchSection.value} did not have class on ${searchDate.value}.`);
-        return;
-      }
+
+      // Ensure all section had class on requested date
+      const hasClass = await allSectionHaveClass(searchSections.value, searchDate.value);
+      if (!hasClass) return;
 
       // Get students in requested section
-      const sectionStudents = await studentsInSection(searchSection.value);
+      const sectionStudents = await studentsInSections(searchSections.value);
 
       // Create listener for student checkins
       const q = query(
         collection(db, "checkins"),
-        where("section", "==", searchSection.value),
+        where("section", "in", searchSections.value),
         where("date", "==", searchDate.value)
       );
       searchSub.value = onSnapshot(q, qs => {
@@ -127,7 +134,7 @@
           {
             date: searchDate.value,
             email: student.email,
-            section: searchSection.value,
+            section: student.section,
             present: student.present,
             excused: !student.excused,
           }
@@ -152,7 +159,7 @@
           {
             date: searchDate.value,
             email: student.email,
-            section: searchSection.value,
+            section: student.section,
             present: !student.present,
             excused: student.excused,
           }
@@ -171,7 +178,7 @@
     <div class="h-fit col-span-12 md:col-span-3 bg-white shadow-lg rounded-lg py-4 px-6">
       <transition name="fade" mode="out-in">
         <div v-if="students">
-          <h3 class="font-bold text-center">{{ searchDate }} - {{ searchSection }}</h3>
+          <h3 class="font-bold text-center">{{ searchDate }} - {{ searchSections.join(", ") }}</h3>
           <p class="text-xs text-center">Students: {{ students.length }} (P={{ presentCount }}, E={{ excusedCount }}, A={{ students.length - presentCount - excusedCount }})</p>
           <button @click="clearSearch" class="mt-4 w-full bg-transparent hover:bg-purple-400 text-purple-700 font-semibold hover:text-white py-3 px-4 border border-purple-400 hover:border-transparent rounded">
             New Search
@@ -183,11 +190,10 @@
             Date
           </label>
           <input v-model="searchDate" type="date" id="search-date" class="w-full bg-gray-200 border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400" />
-          <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mt-2" for="search-section">
-            Section
+          <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mt-2" for="search-sections">
+            Sections
           </label>
-          <select v-model="searchSection" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400" id="search-section">
-            <option value="">Pick one</option>
+          <select v-model="searchSections" multiple :size="store.state.user.sections.length" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400" id="search-sections">
             <option v-for="section in store.state.user.sections" :key="section" :value="section">{{ section }}</option>
           </select>
           <button @click="searchClasses" :disabled="searching" class="mt-4 w-full bg-transparent hover:bg-purple-400 text-purple-700 font-semibold hover:text-white py-3 px-4 border border-purple-400 hover:border-transparent rounded">
