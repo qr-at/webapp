@@ -3,10 +3,10 @@
   import { doc, query, collection, where, getDoc, getDocs, setDoc } from "firebase/firestore";
   import { db } from "../firebase";
   import store from "../store";
+  import StudentTable from "./StudentTable.vue";
 
   const loading = ref(false);
   const addingStudent = ref(false);
-  const searchQuery = ref("");
   const newName = ref("");
   const newEmail = ref("");
   const newSections = ref([]);
@@ -59,17 +59,6 @@
     }
   };
 
-  const searchedStudents = computed(() => {
-    if (!store.state.students) return null;
-    return store.state.students.filter(student => {
-      return (
-        student.name.toLowerCase().indexOf(searchQuery.value.toLowerCase()) != -1
-        || student.email.toLowerCase().indexOf(searchQuery.value.toLowerCase()) != -1
-        || student.section.toLowerCase().indexOf(searchQuery.value.toLowerCase()) != -1
-      )
-    });
-  });
-
   const fetchStudents = async () => {
     try {
       loading.value = true;
@@ -100,6 +89,7 @@
 </script>
 
 <template>
+  
   <div class="grid grid-cols-12 gap-4">
     <div class="h-fit col-span-12 md:col-span-3">
       <div class="bg-white shadow-lg rounded-lg py-4 px-6 mb-4">
@@ -125,41 +115,7 @@
 
     <!-- Student List -->
     <transition name="fade" mode="out-in">
-      <table
-        v-if="store.state.students && store.state.students.length > 0"
-        class="h-fit col-span-12 md:col-span-9 py-4 px-6 divide-y divide-gray-200 shadow-lg mb-6"
-      >
-        <thead class="bg-gray-50">
-          <tr>
-            <th colspan="6" class="p-2">
-              <input type="text" placeholder="Search..." v-model="searchQuery" class="w-full bg-gray-200 border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400" />
-            </th>
-          </tr>
-          <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Excused</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Present</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Attended</th>
-            <th scope="col" class="px-6 py-3"></th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="student in searchedStudents" :key="student.email">
-            <td class="px-6 py-4">{{ student.name }}</td>
-            <td class="px-6 py-4">{{ student.section }}</td>
-            <td class="px-6 py-4">{{ student.excused }}</td>
-            <td class="px-6 py-4">{{ student.present }}</td>
-            <td class="px-6 py-4">{{ student.lastAttended }}</td>
-            <td class="px-6 py-4">
-              <div v-if="store.state.student && student.email == store.state.student.email" class="py-1 text-green-500 border border-transparent">Selected</div>
-              <button v-else @click="() => store.mutations.setStudent(student)" class="bg-transparent hover:bg-green-500 text-green-700 hover:text-slate-50 py-1 px-2 border border-green-500 hover:border-transparent rounded">
-                Select Student
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <student-table v-if="store.state.students && store.state.students.length > 0" />
       <div v-else-if="store.state.students && store.state.students.length == 0">No students</div>
       <div v-else-if="loading">Loading...</div>
       <div v-else>Error - please try again shortly. You may use the "Refresh Students" button.</div>
