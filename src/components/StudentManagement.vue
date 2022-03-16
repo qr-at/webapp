@@ -98,18 +98,21 @@
         </button>
       </div>
       <div class="bg-white shadow-lg rounded-lg py-4 px-6">
-        <h3 class="text-center">Add Student Form</h3>
-        <label for="new-name" class="block uppercase tracking-wide text-gray-700 text-xs font-bold">Student Name</label>
-        <input v-model="newName" type="text" id="new-name" class="w-full bg-gray-200 border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400" />
-        <label for="new-email" class="mt-2 block uppercase tracking-wide text-gray-700 text-xs font-bold">Student Email</label>
-        <input v-model="newEmail" type="email" id="new-email" class="w-full bg-gray-200 border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400" />
-        <label for="new-sections" class="mt-2 block uppercase tracking-wide text-gray-700 text-xs font-bold">Student Sections</label>
-        <select v-model="newSections" multiple class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400" id="new-sections">
-          <option v-for="section in store.state.user.sections" :key="section" :value="section">{{ section }}</option>
-        </select>
-        <button @click="addStudent" class="mt-4 w-full bg-transparent hover:bg-purple-400 text-purple-700 font-semibold hover:text-white py-3 px-4 border border-purple-400 hover:border-transparent rounded">
-          Add Student
-        </button>
+        <details>
+          <summary class="text-left">Add Student Form</summary>
+          <label for="new-name" class="mt-2 block uppercase tracking-wide text-gray-700 text-xs font-bold">Student Name</label>
+          <input v-model="newName" type="text" id="new-name" class="w-full bg-gray-200 border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400" />
+          <label for="new-email" class="mt-2 block uppercase tracking-wide text-gray-700 text-xs font-bold">Student Email</label>
+          <input v-model="newEmail" type="email" id="new-email" class="w-full bg-gray-200 border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400" />
+          <label for="new-sections" class="mt-2 block uppercase tracking-wide text-gray-700 text-xs font-bold">Student Sections</label>
+          <select v-model="newSections" multiple class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400" id="new-sections">
+            <option v-for="section in store.state.user.sections" :key="section" :value="section">{{ section }}</option>
+          </select>
+          <button @click="addStudent" class="mt-4 w-full bg-transparent hover:bg-purple-400 text-purple-700 font-semibold hover:text-white py-3 px-4 border border-purple-400 hover:border-transparent rounded">
+            Add Student
+          </button>
+        </details>
+       
       </div>
     </div>
 
