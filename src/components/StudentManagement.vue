@@ -1,6 +1,6 @@
 <script setup>
-  import { ref, onMounted, computed } from "vue";
-  import { doc, query, collection, where, getDoc, getDocs, setDoc } from "firebase/firestore";
+  import { ref, onMounted } from "vue";
+  import { doc, query, collection, where, getDoc, getDocs, setDoc, deleteDoc, updateDoc, arrayRemove } from "firebase/firestore";
   import { db } from "../firebase";
   import store from "../store";
   import StudentTable from "./StudentTable.vue";
@@ -10,11 +10,35 @@
   const newName = ref("");
   const newEmail = ref("");
   const newSections = ref([]);
+  const delEmail = ref("");
 
   const doesStudentExist = async email => {
     const docRef = doc(db, "users", email);
     const docSnap = await getDoc(docRef);
     return docSnap.exists();
+  };
+
+  const delStudent = async () => {
+    if (!delEmail.value) {
+      store.actions.errorToast("Student email is a required field.");
+      return;
+    }
+
+    try {
+      const delStudent = store.state.students.find(el => el.email == delEmail.value);
+
+      await deleteDoc(doc(db, "attendance", delStudent.id));
+      await updateDoc(doc(db, "users", delEmail.value), {
+        sections: arrayRemove(delStudent.section)
+      });
+      store.state.students = store.state.students.filter(el => el.email != delEmail.value);
+
+      store.actions.successToast(`Deleted ${delEmail.value} from the database.`);
+      delEmail.value = "";
+    } catch (err) {
+      console.log("ERROR | Deleting student.", err);
+      store.actions.errorToast("Error deleting student. Please try again shortly.");
+    }
   };
 
   const addStudent = async () => {
@@ -70,7 +94,7 @@
       );
       const qsnap = await getDocs(q);
       qsnap.forEach(doc => {
-        students.push(doc.data());
+        students.push({ id: doc.id, ...doc.data()});
       });
       students.sort((a, b) => a.name.split(" ")[1] > b.name.split(" ")[1]);
       store.mutations.setStudents(students);
@@ -97,7 +121,7 @@
           Refresh Students
         </button>
       </div>
-      <div class="bg-white shadow-lg rounded-lg py-4 px-6">
+      <div class="bg-white shadow-lg rounded-lg py-4 px-6 mb-4">
         <details>
           <summary class="text-left">Add Student Form</summary>
           <label for="new-name" class="mt-2 block uppercase tracking-wide text-gray-700 text-xs font-bold">Student Name</label>
@@ -112,7 +136,16 @@
             Add Student
           </button>
         </details>
-       
+      </div>
+      <div class="bg-white shadow-lg rounded-lg py-4 px-6">
+        <details>
+          <summary class="text-left">Delete Student Form</summary>
+          <label for="del-email" class="mt-2 block uppercase tracking-wide text-gray-700 text-xs font-bold">Email to Delete</label>
+          <input v-model="delEmail" type="email" id="del-email" class="w-full bg-gray-200 border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400" />
+          <button @click="delStudent" class="mt-4 w-full bg-transparent hover:bg-red-400 text-red-700 font-semibold hover:text-white py-3 px-4 border border-red-400 hover:border-transparent rounded">
+            Delete Student
+          </button>
+        </details>
       </div>
     </div>
 
