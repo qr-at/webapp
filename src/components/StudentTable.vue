@@ -2,19 +2,22 @@
   import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
   import store from "../store";
 
+  const lHeadings = JSON.parse(localStorage.getItem("headings"));
+
   const escapeListener = ref(null);
   const open = ref(false);
   const columnSelect = ref(null)
   const searchQuery = ref("");
   const sortKey = ref("name");
   const sortAsc = ref(true);
-  const headings = ref(JSON.parse(localStorage.getItem("headings")) || [
-    { key: "name", value: "Student Name", hidden: false },
-    { key: "section", value: "Section", hidden: false },
-    { key: "excused", value: "Excused", hidden: false },
-    { key: "present", value: "Present", hidden: false },
-    { key: "lastAttended", value: "Last Seen", hidden: false },
-    { key: null, value: "Actions", hidden: true }
+  const headings = ref([
+    { key: "name", value: "Student Name", hidden: lHeadings ? lHeadings[0].hidden : false },
+    { key: "email", value: "Student Email", hidden: lHeadings ? lHeadings[1].hidden : true },
+    { key: "section", value: "Section", hidden: lHeadings ? lHeadings[2].hidden : false },
+    { key: "excused", value: "Excused", hidden: lHeadings ? lHeadings[3].hidden : false },
+    { key: "present", value: "Present", hidden: lHeadings ? lHeadings[4].hidden : false },
+    { key: "lastAttended", value: "Last Seen", hidden: lHeadings ? lHeadings[5].hidden : false },
+    { key: null, value: "Actions", hidden: lHeadings ? lHeadings[6].hidden : true }
   ]);
 
   watch(
